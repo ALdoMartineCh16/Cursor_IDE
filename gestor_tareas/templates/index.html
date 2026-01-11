@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .form-container {
+            padding: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .tareas-container {
+            padding: 30px;
+        }
+
+        .tareas-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .tarea {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .tarea:hover {
+            background: #e9ecef;
+        }
+
+        .tarea.completada {
+            opacity: 0.6;
+            background: #e8f5e9;
+        }
+
+        .tarea-texto {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .tarea.completada .tarea-texto {
+            text-decoration: line-through;
+            color: #666;
+        }
+
+        .tarea-id {
+            margin-right: 15px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+        }
+
+        .btn-completar {
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #28a745;
+            border-radius: 8px;
+        }
+
+        .btn-completar:hover {
+            background: #218838;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
+        }
+
+        .tarea.completada .btn-completar {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .tarea.completada .btn-completar:hover {
+            background: #6c757d;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tarea-acciones {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-editar {
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #ffc107;
+            border-radius: 8px;
+            color: #000;
+        }
+
+        .btn-editar:hover {
+            background: #e0a800;
+            box-shadow: 0 3px 10px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-eliminar {
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #dc3545;
+            border-radius: 8px;
+        }
+
+        .btn-eliminar:hover {
+            background: #c82333;
+            box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Gestor de Tareas</h1>
+            <p>Organiza tu día de manera eficiente</p>
+        </div>
+
+        <div class="form-container">
+            <form action="/agregar" method="POST">
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        name="texto_tarea" 
+                        placeholder="Escribe una nueva tarea..." 
+                        required
+                        autofocus
+                    >
+                    <button type="submit">Agregar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tareas-container">
+            <h2>Mis Tareas</h2>
+            {% if tareas %}
+                {% for tarea in tareas %}
+                <div class="tarea {% if tarea['hecho'] %}completada{% endif %}">
+                    <span class="tarea-id">#{{ tarea.id }}</span>
+                    <span class="tarea-texto">{{ tarea.texto }}</span>
+                    <div class="tarea-acciones">
+                        {% if not tarea['hecho'] %}
+                        <a href="/completar/{{ tarea.id }}">
+                            <button class="btn-completar">Completar</button>
+                        </a>
+                        {% else %}
+                        <button class="btn-completar" disabled>✓ Completada</button>
+                        {% endif %}
+                        <a href="/editar/{{ tarea.id }}">
+                            <button class="btn-editar">Editar</button>
+                        </a>
+                        <a href="/eliminar/{{ tarea.id }}" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?');">
+                            <button class="btn-eliminar">Eliminar</button>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No hay tareas aún. ¡Agrega una nueva tarea arriba!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

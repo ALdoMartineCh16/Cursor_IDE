@@ -1,0 +1,15 @@
+{
+  "contador_id": 4,
+  "tareas": [
+    {
+      "id": 2,
+      "texto": "tarea 2",
+      "hecho": true
+    },
+    {
+      "id": 3,
+      "texto": "hol3",
+      "hecho": true
+    }
+  ]
+}
